@@ -24,7 +24,8 @@ The data consists of three variables:
 Here we first load all the activity data. We also create a "clean" data set,
 comprising of the data without values for which the steps reading is recorded
 as NA.
-```{r}
+
+```r
 data <- read.csv("activity.csv")
 clean_data <- subset(data, is.na(steps) == FALSE)
 ```
@@ -37,7 +38,8 @@ period.
 
 Then we can calculate out the mean and medians of the number of steps taken per
 data, and finally, mark their position on the histogram.
-```{r}
+
+```r
 steps_by_day <- aggregate(clean_data$steps, by=list(clean_data$date), FUN=sum)
 names(steps_by_day) <- c("Date", "steps")
 hist(steps_by_day$steps, main="Histogram of total number of steps per day",
@@ -45,11 +47,27 @@ hist(steps_by_day$steps, main="Histogram of total number of steps per day",
 step_median <- median(steps_by_day$steps)
 step_mean <- mean(steps_by_day$steps)
 paste("Median steps per day: ", step_median)
+```
+
+```
+## [1] "Median steps per day:  10765"
+```
+
+```r
 paste("Mean steps per day: ", step_mean)
+```
+
+```
+## [1] "Mean steps per day:  10766.1886792453"
+```
+
+```r
 abline(v=step_median, col="red")
 abline(v=step_mean, col="blue")
 legend("topright", lwd=1, col=c("red", "blue"), legend=c("Median", "Mean"))
 ```
+
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2-1.png)
 
 ## What is the average daily activity pattern?
 The next analysis looks at the subject's average daily activity pattern. First,
@@ -58,7 +76,8 @@ across all days. Then, this data can be graphed out as a time-series plot to
 give a profile of the subject's daily activities and show when the subject is
 most active in the number of steps taken.
 
-```{r}
+
+```r
 steps_by_interval <- aggregate(clean_data$steps, by=list(clean_data$interval),
                                FUN=mean)
 names(steps_by_interval) <- c("interval", "steps")
@@ -67,10 +86,18 @@ with(steps_by_interval, plot(
   main="Average number of steps per 5-minute interval"))
 ```
 
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png)
+
 Using this same data, the interval for which the maximum average number of steps
 is taken can easily be identified.
-```{r}
+
+```r
 steps_by_interval[which.max(steps_by_interval$steps),]
+```
+
+```
+##     interval    steps
+## 104      835 206.1698
 ```
 
 ## Imputing missing values
@@ -83,8 +110,13 @@ Therefore, it may be better to devise a strategy to impute the missing values
 for the data.
 
 First we calculate and report the number of missing values in the dataset:
-```{r}
+
+```r
 nrow(subset(data, is.na(steps) == TRUE))
+```
+
+```
+## [1] 2304
 ```
 
 In the next step, the missing values from the original data set are filled in
@@ -92,7 +124,8 @@ with values imputed using a fairly simple strategy: the NA is replaced by the
 median value for that interval across all days. If the value for that interval
 is missing for all days, the NA is replaced with a 0.
 
-```{r}
+
+```r
 data2 <- read.csv("activity.csv")
 
 median_steps_by_interval <- aggregate(clean_data$steps,
@@ -113,13 +146,19 @@ for (i in 1:nrow(data2)) {
 ```
 
 Now, it can be shown there are no more missing values in the dataset:
-```{r}
+
+```r
 nrow(subset(data2, is.na(steps) == TRUE))
+```
+
+```
+## [1] 0
 ```
 
 With the missing data filled in, a new histogram of the number of steps per day
 can be generated from the data, and the new medians and means calculated:
-```{r}
+
+```r
 steps_by_day2 <- aggregate(data2$steps, by=list(data2$date), FUN=sum)
 names(steps_by_day2) <- c("Date", "steps")
 hist(steps_by_day2$steps, main="Histogram of total number of steps per day",
@@ -127,11 +166,27 @@ hist(steps_by_day2$steps, main="Histogram of total number of steps per day",
 step_median2 <- median(steps_by_day2$steps)
 step_mean2 <- mean(steps_by_day2$steps)
 paste("Median steps per day: ", step_median2)
+```
+
+```
+## [1] "Median steps per day:  10395"
+```
+
+```r
 paste("Mean steps per day: ", step_mean2)
+```
+
+```
+## [1] "Mean steps per day:  9503.86885245902"
+```
+
+```r
 abline(v=step_median2, col="red")
 abline(v=step_mean2, col="blue")
 legend("topright", lwd=1, col=c("red", "blue"), legend=c("Median", "Mean"))
 ```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png)
 
 The histogram with the imputed data shows a considerably different activity
 profile than before. The addition of the imputed data lowers both the mean
@@ -146,7 +201,8 @@ level between weekends and weekdays. To test this, a new factor variable is
 introduced on the filled-in dataset, indicating whether each day is a weekday
 or weekend.
 
-```{r}
+
+```r
 data2$day_of_week <- with(
   data2, ifelse(weekdays(
     as.Date(date)) == "Saturday" | weekdays(as.Date(date)) == "Sunday",
@@ -156,7 +212,8 @@ data2$day_of_week <- with(
 Now, the previous time series plots showing average daily activity level can be
 redone for weekdays and weekends, to show a more accurate activity profile.
 
-```{r fig.height=10}
+
+```r
 weekday_data <- subset(data2, day_of_week == "weekday")
 weekday_steps_by_interval <- aggregate(weekday_data$steps,
                                        by=list(weekday_data$interval),
@@ -176,6 +233,8 @@ with(weekend_steps_by_interval, plot(
   interval, steps, type="l", xlab="Interval", ylab="Number of steps",
   main="Average number of steps per 5-minute interval (weekend)"))
 ```
+
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10-1.png)
 
 As can be seen, the weekday and weekend plots show very different activity
 profiles.
